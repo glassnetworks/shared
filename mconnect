@@ -42,32 +42,32 @@ trap 'otherCommands' SIGINT
 # This function needs to be changed to reflect the new accounts being added.
 function buildAcctList()
 {
-        # make the name of the file var lowercase
-        sqlFile=`echo $AcctName|tr '[:upper:]' '[:lower:]'`.sql
-    
+    # make the name of the file var lowercase
+    sqlFile=`echo $AcctName|tr '[:upper:]' '[:lower:]'`.sql
+
     # remove file if its exists to start a clean one
-        if [[ -f $AcctList ]]; then
-                rm -rf $AcctList
-        fi
+    if [[ -f $AcctList ]]; then
+        rm -rf $AcctList
+    fi
 
-        # query database with specific details in the sql file (custom formatting - may not be needed depending on output)
-        # this formatting is from a Remote Desktop Manager database
-        if [[ "$AcctName" = "Account1" ]]; then
-                sqlcmd -S $dBServerIP -U $dBUsername -P $dBPassword -i $sqlQPath/$sqlFile -y0| \
-                awk -F'[<>]' 'BEGIN{a["D"]="Dev";a["Q"]="Test"} /Name/{name=$3; type=a[substr(name,length(name))]; if (length(type)==0) type="Prod";} /SessionHost/{print type, name, $3;}'|sort -u > $AcctList
+    # query database with specific details in the sql file (custom formatting - may not be needed depending on output)
+    # this formatting is from a Remote Desktop Manager database
+    if [[ "$AcctName" = "Account1" ]]; then
+        sqlcmd -S $dBServerIP -U $dBUsername -P $dBPassword -i $sqlQPath/$sqlFile -y0| \
+        awk -F'[<>]' 'BEGIN{a["D"]="Dev";a["Q"]="Test"} /Name/{name=$3; type=a[substr(name,length(name))]; if (length(type)==0) type="Prod";} /SessionHost/{print type, name, $3;}'|sort -u > $AcctList
 
-        elif [[ "$AcctName" = "Account2" ]]; then
+    elif [[ "$AcctName" = "Account2" ]]; then
         sqlcmd -S $dBServerIP -U $dBUsername -P $dBPassword -i $sqlQPath/$sqlFile -y0| \
         awk -F'[<>]' '/Name/{name=$3;type="Non-Prd";if(name ~ /^STK(SPR|PR|SVBLKU|SVBLOCK)/) type="Prod"} /SessionHost/+/Host/{print type, name, $3;}'|sort -u > $AcctList
 
     elif [[ "$AcctName" = "Account3" ]]; then
-                sqlcmd -S $dBServerIP -U $dBUsername -P $dBPassword -i $sqlQPath/$sqlFile -y0| \
-                awk -F'[<>]' '/Name/{name=$3;type="AutoSOW";if(name ~ /^LFVSFCP/) type="AV"} /SessionHost/+/Host/{print type, name, $3;}'|sort -u > $AcctList
+        sqlcmd -S $dBServerIP -U $dBUsername -P $dBPassword -i $sqlQPath/$sqlFile -y0| \
+        awk -F'[<>]' '/Name/{name=$3;type="AutoSOW";if(name ~ /^LFVSFCP/) type="AV"} /SessionHost/+/Host/{print type, name, $3;}'|sort -u > $AcctList
 
     elif [[ "$AcctName" = "Account4" ]]; then
-                sqlcmd -S $dBServerIP -U $dBUsername -P $dBPassword -i $sqlQPath/$sqlFile -y0| \
-                awk -F'[<>]' '/Name/{name=$3;type="Test";if(name ~ /^LINUX/) type="Prod"} /SessionHost/+/Host/{print type, name, $3;}'|sort -u > $AcctList
-        fi
+        sqlcmd -S $dBServerIP -U $dBUsername -P $dBPassword -i $sqlQPath/$sqlFile -y0| \
+        awk -F'[<>]' '/Name/{name=$3;type="Test";if(name ~ /^LINUX/) type="Prod"} /SessionHost/+/Host/{print type, name, $3;}'|sort -u > $AcctList
+    fi
 
     # change permissions on $AcctList
     chmod 666 $AcctList
